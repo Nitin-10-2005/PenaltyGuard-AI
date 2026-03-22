@@ -4,6 +4,4 @@ scikit-learn
 xgboost
 shap
 streamlit==1.32.0
-matplotlib
 joblib
-

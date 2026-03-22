@@ -5,7 +5,6 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 import pandas as pd
 import streamlit as st
-import matplotlib.pyplot as plt
 
 from src.etl import load_and_preprocess_data
 from src.predict import predict_sample
@@ -102,14 +101,13 @@ if st.button("Calculate Risk"):
 
     st.subheader("Top Risk Factors (SHAP)")
     
-    fig, ax = plt.subplots()
-    
-    # Assign colors based on positive/negative impact
-    colors = ['crimson' if val > 0 else 'steelblue' for val in shap_df["shap_value"]]
-    
-    ax.barh(shap_df["feature"], shap_df["shap_value"], color=colors)
-    ax.invert_yaxis()
-    ax.axvline(0, color='black', alpha=0.5, linestyle='--') # Zero line for clear separation
-    
-    st.pyplot(fig)
+    st.subheader("Top Risk Factors (SHAP)")
+
+# Sort for better visualization
+    shap_plot = shap_df.sort_values(by="shap_value")
+
+    st.bar_chart(
+        shap_plot.set_index("feature")["shap_value"]
+    )
+
     st.dataframe(shap_df)
