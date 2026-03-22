@@ -110,17 +110,43 @@ header {visibility: hidden;}
     border-bottom: 1px solid rgba(255, 255, 255, 0.05);
 }
 
-/* Make inputs look integrated */
-.stTextInput>div>div>input, .stNumberInput>div>div>input, .stSelectbox>div>div>div {
-    background-color: rgba(15, 23, 42, 0.6) !important;
+/* Make inputs look integrated without double borders */
+div[data-baseweb="input"],
+div[data-baseweb="select"] > div {
+    background-color: #1a2333 !important; /* Solid matching dark blue-gray */
     border: 1px solid rgba(255, 255, 255, 0.08) !important;
-    color: #f8fafc !important;
     border-radius: 10px !important;
+    padding: 0px !important;
     transition: all 0.2s ease;
 }
-.stTextInput>div>div>input:focus, .stNumberInput>div>div>input:focus, .stSelectbox>div>div>div:focus {
+
+div[data-baseweb="input"]:focus-within,
+div[data-baseweb="select"] > div:focus-within {
     border-color: #6366f1 !important;
     box-shadow: 0 0 0 1px #6366f1 !important;
+}
+
+div[data-baseweb="input"] input {
+    background-color: transparent !important;
+    color: #f8fafc !important;
+    border: none !important;
+    box-shadow: none !important;
+}
+
+/* Guarantee selectbox inner elements don't hide the background or break layout */
+div[data-baseweb="select"] > div > div {
+    background-color: transparent !important;
+    color: #f8fafc !important;
+}
+
+/* Ensure the selected text inside the selectbox is bright white */
+div[data-baseweb="select"] div[class*="SingleValue"] {
+    color: #f8fafc !important;
+}
+
+/* Ensure the arrows and other icons inside selectbox are light */
+div[data-baseweb="select"] svg {
+    fill: #94a3b8 !important;
 }
 .stMarkdown p {
     color: #cbd5e1;
