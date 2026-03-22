@@ -6,3 +6,4 @@ shap
 streamlit
 matplotlib
 joblib
+altair==4.2.2
