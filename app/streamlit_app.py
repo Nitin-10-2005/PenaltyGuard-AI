@@ -6,7 +6,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 import pandas as pd
 import streamlit as st
 
-from src.etl import load_and_preprocess_data
+from src.etl import transform
 from src.predict import predict_sample
 from src.explain import explain_sample
 from src.finance import calculate_penalty
@@ -66,11 +66,8 @@ if st.button("Calculate Risk"):
 
     input_df = pd.DataFrame([input_dict])
 
-    # Load full dataset shapes to align dummy columns
-    X_full, _ = load_and_preprocess_data()
-
-    input_encoded = pd.get_dummies(input_df)
-    input_encoded = input_encoded.reindex(columns=X_full.columns, fill_value=0)
+    # Use saved preprocessing stats and column list from training
+    input_encoded = transform(input_df)
 
     # Prediction
     risk = predict_sample(input_encoded)
