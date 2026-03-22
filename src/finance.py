@@ -29,21 +29,25 @@ def calculate_penalty(predicted_risk, hospital_revenue):
         penalty = 0
         return err, penalty
 
-    # Normal penalty logic
+    # Proportional penalty logic
+    # Penalty rate scales linearly: 0% at ERR=1.0 → 3% cap at ERR≥1.5
+    max_penalty_rate = 0.03
+    err_cap = 1.5  # ERR at which penalty maxes out
+
     if err <= 1:
         penalty = 0
     else:
-        penalty_rate = min((err - 1), 0.03)
+        excess = err - 1.0
+        penalty_rate = min(excess / (err_cap - 1.0), 1.0) * max_penalty_rate
         penalty = penalty_rate * hospital_revenue
 
     return err, penalty
 
 
 if __name__ == "__main__":
-    sample_risk = 0.25
     hospital_revenue = 10000000  # 1 crore
 
-    err, penalty = calculate_penalty(sample_risk, hospital_revenue)
-
-    print(f"ERR: {err:.2f}")
-    print(f"Penalty: ₹{penalty:,.2f}")
+    # Test across risk levels
+    for sample_risk in [0.15, 0.25, 0.35, 0.50, 0.80]:
+        err, penalty = calculate_penalty(sample_risk, hospital_revenue)
+        print(f"Risk: {sample_risk:.2f}  →  ERR: {err:.2f}  →  Penalty: ₹{penalty:,.0f}")

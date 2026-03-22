@@ -5,7 +5,18 @@ from reportlab.lib.pagesizes import A4
 from reportlab.lib import colors
 from reportlab.lib.units import cm
 from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
-from reportlab.lib.styles import getSampleStyleSheet
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+from reportlab.pdfbase import pdfmetrics
+from reportlab.pdfbase.ttfonts import TTFont
+
+# Register a Unicode font that supports ₹
+_UNICODE_FONT = "Helvetica"  # fallback
+_UNICODE_FONT_FILE = "/System/Library/Fonts/Supplemental/Arial Unicode.ttf"
+if os.path.exists(_UNICODE_FONT_FILE):
+    pdfmetrics.registerFont(TTFont("ArialUnicode", _UNICODE_FONT_FILE))
+    _UNICODE_FONT = "ArialUnicode"
+
+_RUPEE = "INR "
 
 
 def generate_report(input_data, risk, err, penalty, shap_df):
@@ -16,6 +27,12 @@ def generate_report(input_data, risk, err, penalty, shap_df):
 
     doc = SimpleDocTemplate(filepath, pagesize=A4)
     styles = getSampleStyleSheet()
+
+    # Override default fonts with Unicode-capable font
+    for style_name in styles.byName:
+        styles[style_name].fontName = _UNICODE_FONT
+    styles["Title"].fontName = _UNICODE_FONT
+    styles["Heading2"].fontName = _UNICODE_FONT
     elements = []
 
     # Title
@@ -29,7 +46,7 @@ def generate_report(input_data, risk, err, penalty, shap_df):
     patient_table.setStyle(TableStyle([
         ("BACKGROUND", (0, 0), (0, -1), colors.HexColor("#f0f0f0")),
         ("GRID", (0, 0), (-1, -1), 0.5, colors.grey),
-        ("FONTNAME", (0, 0), (0, -1), "Helvetica-Bold"),
+        ("FONTNAME", (0, 0), (0, -1), _UNICODE_FONT),
         ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
         ("TOPPADDING", (0, 0), (-1, -1), 4),
         ("BOTTOMPADDING", (0, 0), (-1, -1), 4),
@@ -55,7 +72,7 @@ def generate_report(input_data, risk, err, penalty, shap_df):
     risk_table.setStyle(TableStyle([
         ("BACKGROUND", (0, 0), (0, -1), colors.HexColor("#f0f0f0")),
         ("GRID", (0, 0), (-1, -1), 0.5, colors.grey),
-        ("FONTNAME", (0, 0), (0, -1), "Helvetica-Bold"),
+        ("FONTNAME", (0, 0), (0, -1), _UNICODE_FONT),
     ]))
     elements.append(risk_table)
     elements.append(Spacer(1, 0.5 * cm))
@@ -64,13 +81,13 @@ def generate_report(input_data, risk, err, penalty, shap_df):
     elements.append(Paragraph("Financial Impact", styles["Heading2"]))
     finance_data = [
         ["ERR", f"{err:.2f}"],
-        ["Estimated Penalty", f"₹{penalty:,.2f}"],
+        ["Estimated Penalty", f"{_RUPEE}{penalty:,.2f}"],
     ]
     finance_table = Table(finance_data, colWidths=[7 * cm, 9 * cm])
     finance_table.setStyle(TableStyle([
         ("BACKGROUND", (0, 0), (0, -1), colors.HexColor("#f0f0f0")),
         ("GRID", (0, 0), (-1, -1), 0.5, colors.grey),
-        ("FONTNAME", (0, 0), (0, -1), "Helvetica-Bold"),
+        ("FONTNAME", (0, 0), (-1, -1), _UNICODE_FONT),
     ]))
     elements.append(finance_table)
     elements.append(Spacer(1, 0.5 * cm))
@@ -86,7 +103,7 @@ def generate_report(input_data, risk, err, penalty, shap_df):
     shap_table.setStyle(TableStyle([
         ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#333333")),
         ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
-        ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
+        ("FONTNAME", (0, 0), (-1, 0), _UNICODE_FONT),
         ("GRID", (0, 0), (-1, -1), 0.5, colors.grey),
         ("ROWBACKGROUNDS", (0, 1), (-1, -1), [colors.white, colors.HexColor("#f9f9f9")]),
     ]))
