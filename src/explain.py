@@ -19,11 +19,12 @@ explainer = shap.TreeExplainer(model)
 
 def explain_sample(sample_df):
     """Return top 10 SHAP feature contributions for a single sample."""
-    shap_values = explainer.shap_values(sample_df)
+    shap_values = explainer(sample_df)
+    values = shap_values.values[0]
 
     shap_df = pd.DataFrame({
         "feature": sample_df.columns,
-        "shap_value": shap_values[0],
+        "shap_value": values
     })
 
     shap_df["abs_val"] = shap_df["shap_value"].abs()
@@ -34,8 +35,8 @@ def explain_sample(sample_df):
 
 def global_importance(X):
     """Return top 10 globally important features by mean |SHAP|."""
-    shap_values = explainer.shap_values(X)
-    mean_abs = abs(shap_values).mean(axis=0)
+    shap_values = explainer(X)
+    mean_abs = abs(shap_values.values).mean(axis=0)
 
     importance_df = pd.DataFrame({
         "feature": X.columns,
