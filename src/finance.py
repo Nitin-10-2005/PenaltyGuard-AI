@@ -11,17 +11,29 @@ def calculate_penalty(predicted_risk, hospital_revenue):
         expected_baseline_risk = 0.2
     else:
         expected_baseline_risk = baseline
+
+    # Guard against zero baseline
+    if expected_baseline_risk <= 0:
+        expected_baseline_risk = 0.15
+
     # Excess Readmission Ratio
     err = predicted_risk / expected_baseline_risk
 
     # Penalty calculation
+    if predicted_risk < expected_baseline_risk:
+        penalty = 0
+        return err, penalty
+
+    # Add buffer zone
+    if predicted_risk <= expected_baseline_risk + 0.05:
+        penalty = 0
+        return err, penalty
+
+    # Normal penalty logic
     if err <= 1:
         penalty = 0
     else:
-        penalty_rate = max(0, err - 1)
-        # scale it realistically but keep cap
-        penalty_rate = min(penalty_rate * 0.1, 0.03)
-
+        penalty_rate = min((err - 1), 0.03)
         penalty = penalty_rate * hospital_revenue
 
     return err, penalty

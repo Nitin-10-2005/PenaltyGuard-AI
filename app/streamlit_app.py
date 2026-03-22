@@ -10,6 +10,7 @@ from src.etl import load_and_preprocess_data
 from src.predict import predict_sample
 from src.explain import explain_sample
 from src.finance import calculate_penalty
+from src.report import generate_report
 
 st.title("PenaltyGuard AI - Readmission Risk & Penalty System")
 
@@ -17,8 +18,8 @@ st.subheader("Enter Patient Details")
 
 age = st.number_input("Age", 0, 120, 50)
 gender = st.selectbox("Gender", ["Male", "Female"])
-season = st.selectbox("Season", ["Winter", "Summer", "Monsoon"])
-region = st.selectbox("Region", ["Urban", "Rural"])
+season = st.selectbox("Season", ["Fall", "Spring", "Summer", "Winter"])
+region = st.selectbox("Region", ["Central", "East", "North", "South", "West"])
 
 comorbidities_count = st.number_input("Comorbidities Count", 0, 10, 1)
 length_of_stay = st.number_input("Length of Stay", 1, 30, 5)
@@ -27,20 +28,21 @@ followup_visits_last_year = st.number_input("Followups Last Year", 0, 20, 2)
 prev_readmissions = st.number_input("Previous Readmissions", 0, 10, 0)
 
 primary_diagnosis = st.selectbox("Primary Diagnosis", [
-    "Cardiovascular", "Respiratory", "Kidney Disease",
-    "Diabetes", "Stroke", "COPD"
+    "Appendicitis", "COPD", "Diabetes", "Fracture", "Heart Failure",
+    "Hypertension", "Influenza", "Kidney Disease", "Pneumonia",
+    "Sepsis", "Stroke"
 ])
 
 treatment_type = st.selectbox("Treatment Type", [
-    "Medical", "Surgical", "Interventional"
+    "Conservative", "Interventional", "Medical", "Surgical"
 ])
 
 insurance_type = st.selectbox("Insurance Type", [
-    "Private", "Government", "None"
+    "Medicaid", "Medicare", "Private", "Uninsured"
 ])
 
-discharge_disposition = st.selectbox("Discharge", [
-    "Home", "Rehab", "Expired"
+discharge_disposition = st.selectbox("Discharge Disposition", [
+    "Home", "Home Health", "Rehab", "Skilled Nursing"
 ])
 
 revenue = st.number_input("Hospital Revenue (₹)", value=10000000)
@@ -100,10 +102,8 @@ if st.button("Calculate Risk"):
     st.write(f"Estimated Penalty: ₹{penalty:,.2f}")
 
     st.subheader("Top Risk Factors (SHAP)")
-    
-    st.subheader("Top Risk Factors (SHAP)")
 
-# Sort for better visualization
+    # Sort for better visualization
     shap_plot = shap_df.sort_values(by="shap_value")
 
     st.bar_chart(
@@ -111,3 +111,13 @@ if st.button("Calculate Risk"):
     )
 
     st.dataframe(shap_df)
+
+    # Generate PDF report
+    pdf_path = generate_report(input_dict, risk, err, penalty, shap_df)
+    with open(pdf_path, "rb") as f:
+        st.download_button(
+            label="📄 Download PDF Report",
+            data=f,
+            file_name="patient_report.pdf",
+            mime="application/pdf",
+        )
