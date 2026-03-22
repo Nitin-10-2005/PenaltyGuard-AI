@@ -14,13 +14,13 @@ from etl import load_and_preprocess_data
 
 # Load trained model and initialize explainer
 model = joblib.load("models/xgb_model.pkl")
-explainer = shap.Explainer(model)
+explainer = shap.TreeExplainer(model, feature_perturbation="tree_path_dependent")
 
 
 def explain_sample(sample_df):
     """Return top 10 SHAP feature contributions for a single sample."""
-    shap_values = explainer(sample_df)
-    values = shap_values.values[0]
+    shap_values = explainer.shap_values(sample_df)
+    values = shap_values[0]
 
     shap_df = pd.DataFrame({
         "feature": sample_df.columns,
@@ -35,8 +35,8 @@ def explain_sample(sample_df):
 
 def global_importance(X):
     """Return top 10 globally important features by mean |SHAP|."""
-    shap_values = explainer(X)
-    mean_abs = abs(shap_values.values).mean(axis=0)
+    shap_values = explainer.shap_values(X)
+    mean_abs = abs(shap_values).mean(axis=0)    
 
     importance_df = pd.DataFrame({
         "feature": X.columns,
