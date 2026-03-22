@@ -14,7 +14,7 @@ from etl import load_and_preprocess_data
 
 # Load trained model and initialize explainer
 model = joblib.load("models/xgb_model.pkl")
-explainer = shap.TreeExplainer(model)
+explainer = shap.Explainer(model)
 
 
 def explain_sample(sample_df):
